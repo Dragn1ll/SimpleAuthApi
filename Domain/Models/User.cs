@@ -1,4 +1,4 @@
-namespace SimpleAuthApi;
+namespace Domain.Models;
 
 public class User
 {
@@ -6,4 +6,6 @@ public class User
     public required string Email { get; set; }
     public required string Password { get; set; }
     public string Username { get; set; } = string.Empty;
+    public DateOnly CreatedDate { get; set; }
+    public DateOnly UpdatedDate { get; set; }
 }

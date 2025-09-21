@@ -6,4 +6,4 @@ public record RegisterRequest(
     [Required] string Email,
     [Required] string Password,
     [Required] string Username
-    );
+    ) : AuthRequest(Email, Password);

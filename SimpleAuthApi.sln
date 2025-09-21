@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleAuthApi", "SimpleAuthApi\SimpleAuthApi.csproj", "{6E964E03-9C25-4C8E-9D5D-EAF10FA91C2F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{58195BA2-E43A-45A6-B921-BAF3B38D9109}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{D476A12C-7DAC-47BD-B3A9-C10A56642926}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +16,13 @@ Global
 		{6E964E03-9C25-4C8E-9D5D-EAF10FA91C2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E964E03-9C25-4C8E-9D5D-EAF10FA91C2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E964E03-9C25-4C8E-9D5D-EAF10FA91C2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58195BA2-E43A-45A6-B921-BAF3B38D9109}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58195BA2-E43A-45A6-B921-BAF3B38D9109}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58195BA2-E43A-45A6-B921-BAF3B38D9109}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58195BA2-E43A-45A6-B921-BAF3B38D9109}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D476A12C-7DAC-47BD-B3A9-C10A56642926}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D476A12C-7DAC-47BD-B3A9-C10A56642926}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D476A12C-7DAC-47BD-B3A9-C10A56642926}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D476A12C-7DAC-47BD-B3A9-C10A56642926}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

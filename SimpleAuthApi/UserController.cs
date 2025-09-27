@@ -41,6 +41,7 @@ public class UserController(IUserService userService, IValidator<AuthRequest> va
             Email = registerRequest.Email,
             Password = registerRequest.Password,
             Username = registerRequest.Username,
+            Gender = registerRequest.Gender,
             CreatedDate = DateOnly.FromDateTime(DateTime.UtcNow)
         });
         

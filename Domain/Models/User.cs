@@ -1,3 +1,5 @@
+using Domain.Enums;
+
 namespace Domain.Models;
 
 public class User
@@ -8,4 +10,5 @@ public class User
     public string Username { get; set; } = string.Empty;
     public DateOnly CreatedDate { get; set; }
     public DateOnly UpdatedDate { get; set; }
+    public Gender Gender { get; set; } = Gender.Other;
 }

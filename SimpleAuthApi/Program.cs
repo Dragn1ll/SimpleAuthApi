@@ -1,9 +1,11 @@
 using Application.Interfaces;
+using Application.Queues;
 using Application.Services;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using NLog.Web;
 using Persistence;
+using SimpleAuthApi.BackgroundServices;
 using SimpleAuthApi.Requests;
 using SimpleAuthApi.Validators;
 
@@ -19,7 +21,9 @@ services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString(nameof(AppDbContext)));
 });
 
-services.AddLogging();
+services.AddSingleton<FileLogQueue>();
+services.AddHostedService<FileLogWriterHostedService>();
+
 services.AddSingleton<IUserService, UserService>();
 services.AddScoped<IValidator<AuthRequest>, AuthRequestValidator>();
 

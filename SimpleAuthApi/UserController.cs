@@ -1,5 +1,6 @@
 using Application.Dto;
 using Application.Interfaces;
+using Application.Queues;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using SimpleAuthApi.Requests;
@@ -9,7 +10,7 @@ namespace SimpleAuthApi;
 [ApiController]
 [Route("api/[controller]")]
 public class UserController(IUserService userService, IValidator<AuthRequest> validator, 
-    ILogger<UserController> logger) : ControllerBase
+    ILogger<UserController> logger, FileLogQueue fileLog) : ControllerBase
 {
     [HttpPost("login")]
     public async Task<IActionResult> Authorize([FromBody] AuthRequest authRequest)
@@ -34,6 +35,7 @@ public class UserController(IUserService userService, IValidator<AuthRequest> va
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
     {
+        await fileLog.EnqueueAsync($"[{DateTime.UtcNow:o}] регистрация началась email={registerRequest.Email}");
         var validResult = await validator.ValidateAsync(registerRequest);
         if (!validResult.IsValid)
         {
@@ -53,6 +55,8 @@ public class UserController(IUserService userService, IValidator<AuthRequest> va
         });
         
         logger.LogInformation("Регистрация прошла успешно. {Email} {UserId}", registerRequest.Email, userId);
+        await fileLog.EnqueueAsync(
+            $"[{DateTime.UtcNow:o}] регистрация выполнена успешно email={registerRequest.Email} userId={userId}");
 
         return Ok(userId);
     }

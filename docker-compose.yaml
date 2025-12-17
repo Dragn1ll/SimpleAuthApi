@@ -1,0 +1,12 @@
+services:
+  postgres:
+   image: postgres:18-alpine
+   container_name: simpleDb
+   ports:
+    - "5435:5432"
+   env_file: .env
+   volumes:
+    - postgres_data:/var/lib/postgresql
+
+volumes:
+ postgres_data:

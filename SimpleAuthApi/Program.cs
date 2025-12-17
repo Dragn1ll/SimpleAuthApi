@@ -31,6 +31,11 @@ services.AddSwaggerGen();
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    MigrateDatabase(app);
+}
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -39,3 +44,14 @@ app.UseSession();
 app.MapControllers();
 
 app.Run();
+
+static void MigrateDatabase(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    if (dbContext.Database.GetPendingMigrations().Any())
+    {
+        dbContext.Database.Migrate();
+    }
+}

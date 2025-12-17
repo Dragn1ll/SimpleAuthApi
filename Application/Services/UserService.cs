@@ -7,103 +7,116 @@ namespace Application.Services;
 
 public class UserService : IUserService
 {
-    private readonly List<User> _users = [];
-    private int _nextId = 1;
-    
-    public User? Authorize(AuthDto authDto)
+    private readonly IUserRepository _repository;
+
+    public UserService(IUserRepository repository)
     {
-        return _users.FirstOrDefault(u => u.Email == authDto.Email && u.Password == authDto.Password);
+        _repository = repository;
     }
     
-    public User Register(RegisterDto registerDto)
+    public async Task<User?> Authorize(AuthDto authDto)
+    {
+        return await _repository.GetByFilter(u => u.Email == authDto.Email && u.Password == authDto.Password);
+    }
+    
+    public async Task<int> Register(RegisterDto registerDto)
     {
         var user = new User
         {
             Email = registerDto.Email,
             Password = registerDto.Password,
             Username = registerDto.Username,
-            Id = _nextId++,
             CreatedDate = registerDto.CreatedDate,
             UpdatedDate = registerDto.CreatedDate
         };
         
-        _users.Add(user);
-        
-        return user;
+        return await _repository.Add(user);
     }
     
-    public User? PutUser(int id, PutUserDto putUserDto)
+    public async Task<bool> PutUser(int userId, PutUserDto putUserDto)
     {
-        var user = _users.FirstOrDefault(u => u.Id == id);
-        if (user == null)
-            return null;
-        
-        user.Email = putUserDto.Email;
-        user.Password = putUserDto.Password;
-        user.Username = putUserDto.Username;
-        user.UpdatedDate = putUserDto.UpdatedDate;
-        
-        return user;
+        try
+        {
+            await _repository.Update(userId, user =>
+            {
+                user.Email = putUserDto.Email;
+                user.Password = putUserDto.Password;
+                user.Username = putUserDto.Username;
+                user.UpdatedDate = putUserDto.UpdatedDate;
+            });
+            
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return false;
+        }
     }
     
-    public User? DeleteUser(int id)
+    public async Task<bool> DeleteUser(int userId)
     {
-        var user = _users.FirstOrDefault(u => u.Id == id);
-        if (user == null)
-            return null;
+        try
+        {
+            await _repository.Remove(userId);
         
-        _users.Remove(user);
-        
-        return user;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return false;
+        }
     }
 
-    public List<User> GetUsersByDateRange(DateOnly fromDate, DateOnly toDate)
+    public Task<IEnumerable<User>> GetUsersByDateRange(DateOnly fromDate, DateOnly toDate)
     {
-        return _users.Where(u => u.UpdatedDate >= fromDate && u.UpdatedDate <= toDate).ToList();
+        return _repository.GetAllByFilter(u => u.UpdatedDate >= fromDate && u.UpdatedDate <= toDate);
     }
     
-    public DateOnly? GetMinRegistrationDate()
+    public async Task<DateOnly?> GetMinRegistrationDate()
     {
-        if (_users.Count == 0) return null;
-        return _users.Min(u => u.CreatedDate);
+        return await _repository.GetMinRegistrationDate();
     }
 
-    public DateOnly? GetMaxRegistrationDate()
+    public async Task<DateOnly?> GetMaxRegistrationDate()
     {
-        if (_users.Count == 0) return null;
-        return _users.Max(u => u.CreatedDate);
+        return await _repository.GetMaxRegistrationDate();
     }
 
-    public IEnumerable<User> GetSortedUsers(Func<User, object> keySelector, bool ascending = true)
+    public async Task<IEnumerable<User>> GetSortedUsers(Func<User, object> keySelector, bool ascending = true)
     {
-        return ascending ? _users.OrderBy(keySelector).ToList() : _users.OrderByDescending(keySelector).ToList();
+        var users = await _repository.GetAllByFilter(_ => true);
+        return ascending 
+            ? users.OrderBy(keySelector).ToList() 
+            : users.OrderByDescending(keySelector).ToList();
     }
 
-    public IEnumerable<User> GetUsersByGender(Gender gender)
+    public async Task<IEnumerable<User>> GetUsersByGender(Gender gender)
     {
-        return _users.Where(u => u.Gender == gender).ToList();
+        return await _repository.GetAllByFilter(u => u.Gender.Id == (int)gender);
     }
 
     public int GetTotalUsersCount()
     {
-        return _users.Count;
+        return _repository.UsersCount;
     }
 
-    public IEnumerable<User> GetUsersPage(int pageNumber, int pageSize)
+    public async Task<IEnumerable<User>> GetUsersPage(int pageNumber, int pageSize)
     {
         if (pageNumber < 1) pageNumber = 1;
         if (pageSize < 1) pageSize = 10;
 
         var skip = (pageNumber - 1) * pageSize;
-        return _users.Skip(skip).Take(pageSize).ToList();
+        return await _repository.GetAllByRange(skip, pageSize);
     }
 
-    public IEnumerable<User> GetUsersRangeByIndex(int startInclusive, int endExclusive)
+    public async Task<IEnumerable<User>> GetUsersRangeByIndex(int startInclusive, int endExclusive)
     {
         if (startInclusive < 0) startInclusive = 0;
         if (endExclusive <= startInclusive) return [];
 
         var count = endExclusive - startInclusive;
-        return _users.Skip(startInclusive).Take(count).ToList();
+        return await _repository.GetAllByRange(startInclusive, count);
     }
 }

@@ -11,32 +11,33 @@ namespace SimpleAuthApi;
 public class UserController(IUserService userService, IValidator<AuthRequest> validator) : ControllerBase
 {
     [HttpPost("login")]
-    public IActionResult Authorize([FromBody] AuthRequest authRequest)
+    public async Task<IActionResult> Authorize([FromBody] AuthRequest authRequest)
     {
-        var validResult = validator.Validate(authRequest);
+        var validResult = await validator.ValidateAsync(authRequest);
         if (!validResult.IsValid)
             return BadRequest(validResult.Errors);
         
-        var user = userService.Authorize(new AuthDto
+        var user = await userService.Authorize(new AuthDto
         {
             Email = authRequest.Email,
             Password = authRequest.Password
         });
 
-        if (user == null) return NotFound();
+        if (user == null) 
+            return NotFound();
         
         HttpContext.Session.SetInt32("UserId", user.Id);
         return Ok(user);
     }
 
     [HttpPost("register")]
-    public IActionResult Register([FromBody] RegisterRequest registerRequest)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
     {
-        var validResult = validator.Validate(registerRequest);
+        var validResult = await validator.ValidateAsync(registerRequest);
         if (!validResult.IsValid)
             return BadRequest(validResult.Errors);
         
-        var user = userService.Register(new RegisterDto
+        var userId = await userService.Register(new RegisterDto
         {
             Email = registerRequest.Email,
             Password = registerRequest.Password,
@@ -45,16 +46,16 @@ public class UserController(IUserService userService, IValidator<AuthRequest> va
             CreatedDate = DateOnly.FromDateTime(DateTime.UtcNow)
         });
         
-        return Ok(user);
+        return Ok(userId);
     }
 
     [HttpPut]
-    public IActionResult PutUser([FromBody] PutUserRequest putUserRequest)
+    public async Task<IActionResult> PutUser([FromBody] PutUserRequest putUserRequest)
     {
         var userId = HttpContext.Session.GetInt32("UserId");
         if (userId == null) return Unauthorized();
         
-        var user = userService.PutUser(userId.Value, new PutUserDto
+        var isUpdated = await userService.PutUser(userId.Value, new PutUserDto
         {
             Email = putUserRequest.Email,
             Password = putUserRequest.Password,
@@ -62,24 +63,24 @@ public class UserController(IUserService userService, IValidator<AuthRequest> va
             UpdatedDate = DateOnly.FromDateTime(DateTime.UtcNow)
         });
         
-        return Ok(user);
+        return isUpdated ? Ok() : BadRequest();
     }
 
     [HttpDelete]
-    public IActionResult DeleteUser()
+    public async Task<IActionResult> DeleteUser()
     {
         var userId = HttpContext.Session.GetInt32("UserId");
         if (userId == null) return Unauthorized();
         
-        var user = userService.DeleteUser(userId.Value);
+        var isDeleted = await userService.DeleteUser(userId.Value);
         
-        return Ok(user);
+        return isDeleted ? NoContent() : BadRequest();
     }
 
     [HttpGet("by-date-range")]
-    public IActionResult GetUsersByDateRange(DateOnly fromDate, DateOnly toDate)
+    public async Task<IActionResult> GetUsersByDateRange(DateOnly fromDate, DateOnly toDate)
     {
-        var users = userService.GetUsersByDateRange(fromDate, toDate);
+        var users = await userService.GetUsersByDateRange(fromDate, toDate);
         
         return Ok(users);
     }

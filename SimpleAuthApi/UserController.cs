@@ -84,4 +84,30 @@ public class UserController(IUserService userService, IValidator<AuthRequest> va
         
         return Ok(users);
     }
+    
+    [HttpGet("stats/registration-date/min")]
+    public async Task<ActionResult> GetMinRegistrationDate()
+        => Ok(await userService.GetMinRegistrationDate());
+    
+    [HttpGet("stats/registration-date/max")]
+    public async Task<ActionResult> GetMaxRegistrationDate()
+        => Ok(await userService.GetMaxRegistrationDate());
+    
+    [HttpGet("stats/count")]
+    public ActionResult GetTotalUsersCount()
+        => Ok(userService.GetTotalUsersCount());
+    
+    [HttpGet("page")]
+    public async Task<ActionResult> GetPage([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+    {
+        var users = await userService.GetUsersPage(pageNumber, pageSize);
+        return Ok(users);
+    }
+
+    [HttpGet("range")]
+    public async Task<ActionResult> GetRange([FromQuery] int startInclusive, [FromQuery] int endExclusive)
+    {
+        var users = await userService.GetUsersRangeByIndex(startInclusive, endExclusive);
+        return Ok(users);
+    }
 }

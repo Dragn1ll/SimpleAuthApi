@@ -2,11 +2,15 @@ using Application.Interfaces;
 using Application.Services;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using NLog.Web;
 using Persistence;
 using SimpleAuthApi.Requests;
 using SimpleAuthApi.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Host.UseNLog();
 
 var services = builder.Services;
 
@@ -15,6 +19,7 @@ services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString(nameof(AppDbContext)));
 });
 
+services.AddLogging();
 services.AddSingleton<IUserService, UserService>();
 services.AddScoped<IValidator<AuthRequest>, AuthRequestValidator>();
 

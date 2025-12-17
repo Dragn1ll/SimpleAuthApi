@@ -8,7 +8,8 @@ namespace SimpleAuthApi;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UserController(IUserService userService, IValidator<AuthRequest> validator) : ControllerBase
+public class UserController(IUserService userService, IValidator<AuthRequest> validator, 
+    ILogger<UserController> logger) : ControllerBase
 {
     [HttpPost("login")]
     public async Task<IActionResult> Authorize([FromBody] AuthRequest authRequest)
@@ -35,8 +36,13 @@ public class UserController(IUserService userService, IValidator<AuthRequest> va
     {
         var validResult = await validator.ValidateAsync(registerRequest);
         if (!validResult.IsValid)
+        {
+            logger.LogWarning("Данные не прошли валидацию. {Email}", registerRequest.Email);
             return BadRequest(validResult.Errors);
-        
+        }
+
+        logger.LogInformation("Регистрация начата. {Email}", registerRequest.Email);
+
         var userId = await userService.Register(new RegisterDto
         {
             Email = registerRequest.Email,
@@ -46,6 +52,8 @@ public class UserController(IUserService userService, IValidator<AuthRequest> va
             CreatedDate = DateOnly.FromDateTime(DateTime.UtcNow)
         });
         
+        logger.LogInformation("Регистрация прошла успешно. {Email} {UserId}", registerRequest.Email, userId);
+
         return Ok(userId);
     }
 

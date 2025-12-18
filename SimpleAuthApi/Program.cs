@@ -1,12 +1,13 @@
 using Application.Interfaces;
 using Application.Queues;
 using Application.Services;
+using Contracts.Requests;
 using FluentValidation;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using NLog.Web;
 using Persistence;
 using SimpleAuthApi.BackgroundServices;
-using SimpleAuthApi.Requests;
 using SimpleAuthApi.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,20 @@ var services = builder.Services;
 services.AddDbContext<AppDbContext>(options => 
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString(nameof(AppDbContext)));
+});
+
+services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("localhost", "/", h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+
+        cfg.ConfigureEndpoints(context);
+    });
 });
 
 services.AddSingleton<FileLogQueue>();

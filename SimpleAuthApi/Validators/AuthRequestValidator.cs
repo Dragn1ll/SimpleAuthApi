@@ -1,5 +1,5 @@
+using Contracts.Requests;
 using FluentValidation;
-using SimpleAuthApi.Requests;
 
 namespace SimpleAuthApi.Validators;
 

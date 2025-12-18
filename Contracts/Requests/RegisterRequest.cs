@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Domain.Enums;
 
-namespace SimpleAuthApi.Requests;
+namespace Contracts.Requests;
 
 public record RegisterRequest(
     [Required] string Email,

@@ -1,16 +1,18 @@
 using Application.Dto;
 using Application.Interfaces;
 using Application.Queues;
+using Contracts.RabbitMq;
+using Contracts.Requests;
 using FluentValidation;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
-using SimpleAuthApi.Requests;
 
 namespace SimpleAuthApi;
 
 [ApiController]
 [Route("api/[controller]")]
 public class UserController(IUserService userService, IValidator<AuthRequest> validator, 
-    ILogger<UserController> logger, FileLogQueue fileLog) : ControllerBase
+    ILogger<UserController> logger, FileLogQueue fileLog, IPublishEndpoint publishEndpoint) : ControllerBase
 {
     [HttpPost("login")]
     public async Task<IActionResult> Authorize([FromBody] AuthRequest authRequest)
@@ -53,6 +55,12 @@ public class UserController(IUserService userService, IValidator<AuthRequest> va
             Gender = registerRequest.Gender,
             CreatedDate = DateOnly.FromDateTime(DateTime.UtcNow)
         });
+        
+        await publishEndpoint.Publish(new UserRegistered(
+            UserId: userId,
+            Email: registerRequest.Email,
+            Username: registerRequest.Username,
+            CreatedDateUtc: DateOnly.FromDateTime(DateTime.UtcNow)));
         
         logger.LogInformation("Регистрация прошла успешно. {Email} {UserId}", registerRequest.Email, userId);
         await fileLog.EnqueueAsync(

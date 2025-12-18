@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SimpleAuthApi.Requests;
+namespace Contracts.Requests;
 
 public record AuthRequest(
     [Required] string Email,
